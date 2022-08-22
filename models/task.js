@@ -1,6 +1,7 @@
 //v4 : uuidv4 con esto estamos renombrando al v4
 
 const  {  v4 : uuidv4  }  =  require ( 'uuid' )
+
 class Task {
 
     id = '';
@@ -11,6 +12,7 @@ class Task {
 
         this.id = uuidv4();
         this.descr = descr;
+        this.completed = null;
 
     }
 

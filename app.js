@@ -1,7 +1,8 @@
 require('colors');
-
-const { inquirerMenu, pause } = require('./helpers/inquirer');
+const { saveDB, readDB } = require('./helpers/saveFile');
+const { inquirerMenu, pause, readInput, listTaskDelete, confirm } = require('./helpers/inquirer');
 const Tasks = require('./models/tasks');
+
 
 
 
@@ -16,13 +17,53 @@ const main = async () => {
 
     let opt = '';
     const tasks = new Tasks();
-    
+
+    const tasksDB = readDB();
+
+    if (tasksDB) {
+        //Set the task
+        tasks.loadTasksFromArray(tasksDB)
+    }
+
+
     do {
+        //print the menú
         opt = await inquirerMenu();
-        console.log({ opt });
 
+        switch (opt) {
+            case '1':
+                //create option
+                const descr = await readInput('Description:');
+                tasks.createTask(descr);
+                break;
 
-        await pause();
+            case '2':
+                tasks.fullListing();
+                break;
+
+            case '3': //Completed
+                tasks.listPendingCompleted(true);
+                break;
+
+            case '4': //Pending
+                tasks.listPendingCompleted(false);
+                break;
+
+            case '6': //Delete
+                const id = await listTaskDelete(tasks.listArr);
+                if (id !== '0') {
+                    const ok = await confirm('Are you shure?');
+                    if (ok) {
+                        tasks.deleteTask(id);
+                        console.log(`Task deleted`)
+                    }
+                }
+            break;
+        }
+
+        saveDB(tasks.listArr)
+
+        await pause(tasks.listArr);
 
     } while (opt !== '0');
 
